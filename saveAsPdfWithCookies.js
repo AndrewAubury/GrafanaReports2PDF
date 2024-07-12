@@ -9,8 +9,8 @@ async function launchBrowser() {
     console.log('Launching browser...');
     browser = await puppeteer.launch({
       headless: false,
-       executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
+	  args: ['--no-sandbox', '--disable-setuid-sandbox',"--hide-scrollbars"], // Add additional args if needed
     });
     console.log('Browser launched.');
   }
@@ -25,7 +25,7 @@ async function openPage(url) {
   const height = 1080;
   await page.setViewport({ width, height });
   await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
-  await page.waitForSelector('body', { timeout: 60000 });
+  await page.waitForSelector('.grafana-app', { timeout: 60000 });
   console.log('Page opened and loaded.');
   return page;
 }
@@ -65,9 +65,11 @@ async function checkPanels(page) {
 
     for (const key in panelData) {
       if (panelData[key] === undefined) {
-        panelsErrored++;
+        
       } else if (panelData[key].state === "Done") {
         panelsDone++;
+      }else if (panelData[key].state === "Error") {
+        panelsErrored++;
       }
     }
 
@@ -112,7 +114,7 @@ async function loadAndSave(url, filename) {
   try {
     await scrollPage(page);
 
-    const panelsCount = 20;
+    const panelsCount = 1;
     const panelsLoaded = await waitForPanels(page, panelsCount, 60000);
     if (!panelsLoaded) {
       console.error('Timeout: Not all panels loaded successfully.');
@@ -159,11 +161,10 @@ async function waitForUserInput() {
 
   await initialPage.close();
 
-  var countTest = 0;
-  while(countTest < 50){
-    await loadAndSave('https://grafana.andrewa.co.uk/d/IfgdXjtns-a4/proxmox-overview-a4-report?orgId=3&refresh=30s&kiosk', `filename-${countTest}.pdf`);
-    countTest++;
-  }
+ while(true){
+    await loadAndSave('https://grafana.andrewa.co.uk/d/ddqd1prkhe1hcc/user-report?orgId=2&var-userId=3483&from=now-90d&to=now&kiosk', `filename.pdf`);
+	await waitForUserInput();
+ }
 
   if (browser) {
     await browser.close();
