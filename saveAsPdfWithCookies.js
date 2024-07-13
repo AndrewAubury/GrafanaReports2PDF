@@ -26,6 +26,7 @@ async function openPage(url) {
   await page.setViewport({ width, height });
   await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
   await page.waitForSelector('.grafana-app', { timeout: 60000 });
+  await new Promise(resolve => setTimeout(resolve, 2000));
   console.log('Page opened and loaded.');
   return page;
 }
@@ -150,6 +151,10 @@ async function waitForUserInput() {
   });
 }
 
+async function saveReport(userId){
+ return await loadAndSave('https://grafana.andrewa.co.uk/d/ddqd1prkhe1hcc/user-report?orgId=2&var-userId='+userId+'&from=now-90d&to=now&kiosk', `report-${userId}.pdf`);
+}
+
 (async () => {
   await launchBrowser();
   const initialPage = await openPage('https://grafana.andrewa.co.uk/login');
@@ -161,10 +166,12 @@ async function waitForUserInput() {
 
   await initialPage.close();
 
- while(true){
-    await loadAndSave('https://grafana.andrewa.co.uk/d/ddqd1prkhe1hcc/user-report?orgId=2&var-userId=3483&from=now-90d&to=now&kiosk', `filename.pdf`);
-	await waitForUserInput();
- }
+	await saveReport(3483);
+	await saveReport(970);
+	await saveReport(7158);
+	await saveReport(2031);
+
+  
 
   if (browser) {
     await browser.close();
